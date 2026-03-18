@@ -4,6 +4,15 @@
 `include "font_cp437_8x8.v"
 
 /**
+; ==========================================
+; uBASIC6502 fork of mango_one
+; Original monitor and emulator by sehugg
+; Modifications by Vincent Crabtree, Mar 2026
+; - Replaced ROM with uBASIC6502
+; - uBASIC GETCHAR / PUTCHAR modified for verilog
+; ==========================================
+
+/**
 Mango One
 
 A 6502 computer inspired by Steve Wozniak's Apple I design
