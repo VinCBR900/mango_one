@@ -1,11 +1,11 @@
 
 # Changes Made
 
-This is a fork of [sehugg/mango_one](https://github.com/sehugg/mango_one), which provides the 8bitworkshop 6502 monitor.
+This is a fork of [sehugg/mango_one](https://github.com/sehugg/mango_one), which provided the 8bitworkshop 6502 Apple 1 emulator.
 
 Modifications:
 
-- Replaced 256-byte ROMMOnitor  with 2 kB uBASIC6502 at $F800
+- Replaced 256-byte ROM Monitor  with 2 kB uBASIC6502 at $F800
 - Modified GETCHAR / PUTCHAR routines to map BASIC I/O to the emulated Hardware
 
 All other code remains unchanged. Original project copyright (sehugg) retained.
@@ -28,3 +28,5 @@ $F800 | $FFFF    | Tiny BASIC, CPU vectors
 
 See https://github.com/VinCBR900/65c02-Tiny-BASIC for details on uBASIC Tiny BASIC
 
+You can open this project in 8 bit workshop and try it Out!
+https://8bitworkshop.com/v3.12.1/?repo=VinCBR900%2Fmango_one&platform=verilog&file=mango1.v
