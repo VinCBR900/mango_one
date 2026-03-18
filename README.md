@@ -1,3 +1,15 @@
+
+# Changes Made
+
+This is a fork of [sehugg/mango_one](https://github.com/sehugg/mango_one), which provides the 8bitworkshop 6502 monitor.
+
+Modifications:
+
+- Replaced 256-byte ROMMOnitor  with 2 kB uBASIC6502 at $F800
+- Modified GETCHAR / PUTCHAR routines to map BASIC I/O to the emulated Hardware
+
+All other code remains unchanged. Original project copyright (sehugg) retained.
+
 Mango One
 =====
 
@@ -12,16 +24,7 @@ Start | End      | Description
 ------|----------|----------
 $0000 | $0FFF    | RAM
 $D010 | $D013    | 6821 PIA (keyboard, terminal)
-$FF00 | $FFFF    | Monitor ROM, CPU vectors
+$F800 | $FFFF    | Tiny BASIC, CPU vectors
 
-The monitor program in ROM, MangoMon, is a custom 256-byte monitor ROM with just a few commands:
-
-Command   | Function
-----------|----------------------
-`R` `aaaa`      | Dump memory at address $aaaa
-Enter           | Dump next 8 bytes
-`W` `aaaa` `bb` | Write byte $bb at address $aaaa
-`G` `aaaa`      | Jump to address $aaaa
-
-You can [open this project in 8bitworkshop](http://8bitworkshop.com/redir.html?platform=verilog&githubURL=https%3A%2F%2Fgithub.com%2Fsehugg%2Fmango_one&file=mango1.v) and try it out!
+See https://github.com/VinCBR900/65c02-Tiny-BASIC for details on uBASIC Tiny BASIC
 
