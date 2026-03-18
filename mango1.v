@@ -167,7 +167,10 @@ module apple1_top(clk, reset, hsync, vsync, rgb, keycode, keystrobe);
   reg [7:0] ram[4096];		// 1K of RAM
   reg [7:0] basic_rom[2048];	// uBASIC ROM ($F800-$FFFF)
 
+  integer i;
   initial begin
+    for (i=0; i<4096; i=i+1) ram[i] = 0;
+    for (i=0; i<2048; i=i+1) basic_rom[i] = 0;
     $readmemh("showcase.hex", ram);
     $readmemh("ubasic6502.hex", basic_rom);
   end
