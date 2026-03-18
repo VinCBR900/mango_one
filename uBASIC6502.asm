@@ -77,8 +77,9 @@
          .opt proc6502
 
 ; ---- hardware I/O ports ------------------------------------------------------
-IO_OUT   = $E001             ; UART output: write character to terminal
-IO_IN    = $E004             ; UART input:  read character (0 = no char ready)
+IO_OUT   = $D012             ; PIA display port: write character to terminal
+IO_IN    = $D010             ; PIA keyboard data: bit7=key-ready, bits6:0=ASCII
+IO_STAT  = $D011             ; PIA keyboard status: bit7 set when key is ready
 IO_IRQ   = $E007             ; write any value to fire a maskable hardware IRQ
 
 ; ---- RAM ceiling -------------------------------------------------------------
@@ -1670,7 +1671,11 @@ PRT16PRNT:
 ;   Out: --
 ;   Clobbers: --  (flags may change)
 ; =============================================================================
-PUTCH:   STA IO_OUT
+PUTCH:   PHA
+PUTCH_W: BIT IO_OUT           ; read display status from $D012
+         BMI PUTCH_W          ; bit7 set => terminal busy, wait
+         PLA
+         STA IO_OUT
          RTS
 
 ; =============================================================================
@@ -1680,8 +1685,10 @@ PUTCH:   STA IO_OUT
 ;   Out: A = character read
 ;   Clobbers: A
 ; =============================================================================
-GETCH:   LDA IO_IN
-         BEQ GETCH            ; spin until a char is available
+GETCH:   LDA IO_STAT
+         BPL GETCH            ; wait for key-ready (bit7 set)
+         LDA IO_IN            ; read key data (ASCII + ready bit)
+         AND #$7F             ; strip ready flag
          JMP PUTCH            ; echo it, then return (tail call)
 
 ; =============================================================================
