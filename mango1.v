@@ -138,7 +138,9 @@ module apple1_top(clk, reset, hsync, vsync, rgb, keycode, keystrobe);
         16'hd012: begin
           DI <= {!tready, 7'b0}; // display status
         end
-        16'hffzz: DI <= monitor_rom[AB[7:0]];
+        16'hf8zz, 16'hf9zz, 16'hfazz, 16'hfbzz,
+        16'hfczz, 16'hfdzz, 16'hfezz, 16'hffzz:
+          DI <= basic_rom[AB[10:0] - 11'h800];
       endcase
     end
 
@@ -154,10 +156,11 @@ module apple1_top(clk, reset, hsync, vsync, rgb, keycode, keystrobe);
     end
 
   reg [7:0] ram[4096];		// 1K of RAM
-  reg [7:0] monitor_rom[256];	// WozMon ROM
+  reg [7:0] basic_rom[2048];	// uBASIC ROM ($F800-$FFFF)
 
   initial begin
-    $readmemh("mango1.hex", monitor_rom);
+    $readmemh("showcase.hex", ram);
+    $readmemh("ubasic6502.hex", basic_rom);
   end
   
   hvsync_generator hvsync_gen(
