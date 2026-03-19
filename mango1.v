@@ -101,7 +101,7 @@ module signetics_term(clk, reset, hpos, vpos, tready, dot, te, ti);
   
   // terminal ready output
   // only possible at end of line, if not scrolling
-  assign tready = !reset && !te && scnt == 0 && hpos == 256;
+  assign tready = !reset && !te && scnt == 0 && hpos >= 256;
   
   initial begin
     integer i;
