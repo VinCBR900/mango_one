@@ -1,5 +1,5 @@
 ; =============================================================================
-; uBASIC6502 v1.0  --  2 KB Tiny BASIC (NMOS 6502)
+; uBASIC6502 v1.1  --  2 KB Tiny BASIC (NMOS 6502)
 ;
 ; Derived from uBASIC 65C02 v17.0, refactored for NMOS 6502 mnemonics and
 ; 2-byte keyword-prefix matching while retaining support for conventional
@@ -1150,13 +1150,13 @@ EA_LP:   JSR WPEEK
          BEQ EA_DO
          CMP #'-'
          BNE EA_RTS           ; not + or -: done (EA_RTS = E1_RET = shared RTS below)
-EA_DO:   LDX T0+1
-         TXA
+EA_DO:   TAX                  ; save operator in X before A is clobbered
+         LDA T0+1
          PHA                  ; push T0 hi
-         LDX T0
-         TXA
+         LDA T0
          PHA                  ; push T0 lo
-         PHA                  ; push operator
+         TXA
+         PHA                  ; push operator (recovered from X)
          JSR GETCI            ; consume operator
          JSR EXPR1            ; evaluate next term -> T0
          PLA                  ; pull operator
@@ -1853,8 +1853,8 @@ MK_FAIL: LDA LP               ; restore IP to saved position
          .DB $18,$01,$49,$3D,$2D,$36,$34,$0D  ; 280 I=-64
          .DB $22,$01,$49,$46,$20,$49,$3E,$35,$36,$20,$54,$48,$45,$4E,$20,$47,$4F,$54,$4F,$20,$34,$38,$30,$0D  ; 290 IF I>56 THEN GOTO 480
          .DB $2C,$01,$44,$3D,$49,$0D  ; 300 D=I
-         .DB $36,$01,$43,$3D,$2D,$31,$32,$38,$0D  ; 310 C=-128
-         .DB $40,$01,$49,$46,$20,$43,$3E,$31,$36,$20,$54,$48,$45,$4E,$20,$47,$4F,$54,$4F,$20,$34,$35,$30,$0D  ; 320 IF C>16 THEN GOTO 450
+         .DB $36,$01,$43,$3D,$2D,$31,$32,$30,$0D  ; 310 C=-120
+         .DB $40,$01,$49,$46,$20,$43,$3E,$34,$20,$54,$48,$45,$4E,$20,$47,$4F,$54,$4F,$20,$34,$35,$30,$0D  ; 320 IF C>4 THEN GOTO 450
          .DB $4A,$01,$41,$3D,$43,$3A,$42,$3D,$44,$3A,$45,$3D,$30,$3A,$4E,$3D,$31,$0D  ; 330 A=C:B=D:E=0:N=1
          .DB $54,$01,$49,$46,$20,$4E,$3E,$31,$36,$20,$54,$48,$45,$4E,$20,$47,$4F,$54,$4F,$20,$33,$39,$30,$0D  ; 340 IF N>16 THEN GOTO 390
          .DB $5E,$01,$49,$46,$20,$45,$3E,$30,$20,$54,$48,$45,$4E,$20,$47,$4F,$54,$4F,$20,$33,$38,$30,$0D  ; 350 IF E>0 THEN GOTO 380
