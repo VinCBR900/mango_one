@@ -7,7 +7,7 @@ Modifications:
 
 - Replaced 256-byte ROM Monitor  with 2 kB uBASIC6502 at $F800
 - Modified GETCHAR / PUTCHAR routines to map BASIC I/O to the emulated Hardware
-- MOdified keyboard handler for key BASIC syntax "*/-=+*%
+- Modified keyboard handler for key BASIC syntax "*/-=+*%
 
 All other code remains unchanged. Original project copyright (sehugg) retained.
 
@@ -31,6 +31,5 @@ $0000 | $0FFF    | RAM
 $D010 | $D013    | 6821 PIA (keyboard, terminal)
 $F800 | $FFFF    | Tiny BASIC, CPU vectors
 
-You can open this project in 8 bit workshop and try it Out!
+You can open this project in [8 Bit Workshop](https://8bitworkshop.com/v3.12.1/?repo=VinCBR900%2Fmango_one&platform=verilog&file=mango1.v) and try it Out!
 
-https://8bitworkshop.com/v3.12.1/?repo=VinCBR900%2Fmango_one&platform=verilog&file=mango1.v
