@@ -11,7 +11,7 @@ FULL_BIN := ubasic_full.bin
 SHOWCASE_HEX := showcase.hex
 
 SHOWCASE_START := 0x0200
-SHOWCASE_END_EXCL := 0x0623
+SHOWCASE_END_EXCL := 0x0622
 
 .PHONY: all tools rom showcase clean
 
