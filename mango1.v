@@ -1,16 +1,32 @@
-
 `include "hvsync_generator.v"
 `include "cpu6502.v"
 `include "font_cp437_8x8.v"
 
 /**
 ; ==========================================
-; uBASIC6502 fork of mango_one
+; uBASIC6502 fork of mango_one  v1.1
 ; Original monitor and emulator by sehugg
 ; Modifications by Vincent Crabtree, Mar 2026
-; - Replaced ROM with uBASIC6502
-; - uBASIC GETCHAR / PUTCHAR modified for verilog
-; see
+;
+; v1.2 (Mar 2026) Fix Keyboard for correct BASIC syntax "=+;*
+;   Finagle keyboard handler to convert to ASCII
+; v1.1 (Mar 2026) Fix tready timing: hpos==256 -> hpos>=256
+;   The original 1-clock tready pulse at hpos=256 was too narrow.
+;   DI is registered (1-cycle latency), so the CPU only saw tready
+;   for a single clock (hpos=257).  This made each PUTCH wait up to
+;   ~20 horizontal lines on average before catching the ready window.
+;   Widening to hpos>=256 holds tready high for the entire horizontal
+;   blanking period (~52 clocks), giving the CPU a reliable window to
+;   exit the PUTCH_W polling loop.  The te=1 signal (CPU writes $D012)
+;   immediately clears tready, so no character is double-accepted.
+; V1.0 (Mar 2026) Initial Modifications for Tiny BASIC
+;   Replaced Monitor ROM with uBASIC6502
+;   uBASIC GETCHAR / PUTCHAR modified for verilog interface
+;
+; For Original see
+;  https://github.com/sehugg/mango_one
+;
+; For Tiny BASIC  see
 ;   https://github.com/VinCBR900/65c02-Tiny-BASIC
 ; ==========================================
 
@@ -100,7 +116,14 @@ module signetics_term(clk, reset, hpos, vpos, tready, dot, te, ti);
   wire dot = char_data[~hpos[2:0]]; // video output
   
   // terminal ready output
-  // only possible at end of line, if not scrolling
+  // FIX v1.1: was (hpos == 256) — only 1 clock wide, too narrow for the
+  // registered-DI pipeline (CPU saw ready for just 1 cycle at hpos=257).
+  // Changed to (hpos >= 256) so tready holds high across the entire
+  // horizontal blanking period (~52 clocks), giving the CPU a reliable
+  // window to detect ready via PUTCH_W (BIT $D012 / BMI PUTCH_W).
+  // te=1 (CPU writes $D012) immediately forces tready=0 via the !te term,
+  // so the terminal will not accept a second character until the next
+  // hblank with scnt==0.
   assign tready = !reset && !te && scnt == 0 && hpos >= 256;
   
   initial begin
@@ -131,16 +154,43 @@ module apple1_top(clk, reset, hsync, vsync, rgb, keycode, keystrobe);
 
   cpu6502 cpu( clk, reset, AB, DI, DO, WE, IRQ, NMI, RDY );
 
+  // FIX 1.2: Keyboard remapping - 8bitworkshop passes browser KeyboardEvent.keyCode
+  // values for punctuation keys >= 0x80 (not ASCII). Remap to correct ASCII.
+  // Letters/digits/CR/BS/Space have keyCode == ASCII, passed through as-is.
+  // Result retains bit7 (= key-pressed signal for Apple 1 protocol).
+  // For shifted punctuation, the browser fires a keypress with the shifted
+  // charCode (e.g. shift+' sends 0xA2 for '"'), which falls through correctly.
+  function [7:0] remap_key;
+    input [7:0] kc;
+    begin
+      case (kc)
+        8'hBA: remap_key = 8'hBB; // keyCode 186 ; -> ASCII ';'(0x3B)|0x80
+        8'hBB: remap_key = 8'hBD; // keyCode 187 = -> ASCII '='(0x3D)|0x80
+        8'hBC: remap_key = 8'hAC; // keyCode 188 , -> ASCII ','(0x2C)|0x80
+        8'hBD: remap_key = 8'hAD; // keyCode 189 - -> ASCII '-'(0x2D)|0x80
+        8'hBE: remap_key = 8'hAE; // keyCode 190 . -> ASCII '.'(0x2E)|0x80
+        8'hBF: remap_key = 8'hAF; // keyCode 191 / -> ASCII '/'(0x2F)|0x80
+        8'hC0: remap_key = 8'hE0; // keyCode 192 ` -> ASCII '`'(0x60)|0x80
+        8'hDE: remap_key = 8'hA7; // keyCode 222 ' -> ASCII "'"(0x27)|0x80
+        default: remap_key = kc;  // ASCII|0x80 correct: digits, letters,
+      endcase                     //  CR(0x8D), BS(0x88), shift-chars(0xA2=")
+    end
+  endfunction
+
   always @(posedge clk)
     begin
       casez (AB)
         16'h0zzz: DI <= ram[AB[11:0]];
         16'hd010: begin
-          if (keycode >= 97+128 && keycode <= 122+128)
-            DI <= keycode - 32; // convert to uppercase
-          else
-            DI <= keycode; // keyboard data
-          keystrobe <= (keycode & 8'h80) != 0; // clear kbd buffer
+          begin : kbd_remap
+            reg [7:0] mk;
+            mk = remap_key(keycode);
+            if (mk >= 8'hE1 && mk <= 8'hFA) // a-z with bit7 -> A-Z with bit7
+              DI <= mk - 8'd32;
+            else
+              DI <= mk;
+          end
+          keystrobe <= (keycode & 8'h80) != 0;
         end
         16'hd011: begin
           DI <= keycode & 8'h80; // keyboard status
@@ -176,7 +226,7 @@ module apple1_top(clk, reset, hsync, vsync, rgb, keycode, keystrobe);
     for (i=0; i<2048; i=i+1) basic_rom[i] = 0;
     for (i=0; i<1059; i=i+1) showcase_rom[i] = 0;
     $readmemh("showcase.hex", showcase_rom);
-          for (i=0; i<1059; i=i+1) ram[32'h200 + i] = showcase_rom[i];
+    for (i=0; i<1059; i=i+1) ram[32'h200 + i] = showcase_rom[i];
     $readmemh("ubasic6502.hex", basic_rom);
   end
   
