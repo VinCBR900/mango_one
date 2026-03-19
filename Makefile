@@ -36,7 +36,7 @@ $(FULL_BIN): $(ASM) $(BASIC_SRC)
 	./$(ASM) $(BASIC_SRC) -o $@
 
 $(SHOWCASE_HEX): $(FULL_BIN)
-	python3 -c 'from pathlib import Path; full=Path("ubasic_full.bin").read_bytes(); start=$(SHOWCASE_START); end_excl=$(SHOWCASE_END_EXCL); chunk=full[start:end_excl]; Path("showcase.hex").write_text(f"@{start:04x}\n" + "".join(f"{x:02x}\n" for x in chunk))'
+	python3 -c 'from pathlib import Path; full=Path("ubasic_full.bin").read_bytes(); start=$(SHOWCASE_START); end_excl=$(SHOWCASE_END_EXCL); chunk=full[start:end_excl]; Path("showcase.hex").write_text("".join(f"{x:02x}\n" for x in chunk))'
 
 clean:
 	rm -f $(ASM) $(ROM_BIN) $(ROM_HEX) $(FULL_BIN) $(SHOWCASE_HEX)
