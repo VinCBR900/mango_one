@@ -1696,8 +1696,8 @@ GETCH:   LDA IO_STAT
          BPL GETCH            ; wait for key-ready (bit7 set)
          LDA IO_IN            ; read key data (ASCII + ready bit)
          AND #$7F             ; strip ready flag
-         JMP PUTCH            ; echo it, then return (tail call)
-
+         BPL PUTCH            ; echo it, then return (tail call) (Always taken)
+                              ; Never get here      
 ; =============================================================================
 ; USR_CALL / USR_RET  --  machine-code call helper for USR(addr) atom
 ;
