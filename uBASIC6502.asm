@@ -809,6 +809,13 @@ LS_GO:   LDY #0
          BCC LS_BODY
          INC LP+1
 LS_BODY: LDY #0
+         LDA LP               ; safety: if LP reaches PE before CR, stop LIST
+         CMP PE               ; (guards against malformed/corrupted line data)
+         BNE LS_CHR
+         LDA LP+1
+         CMP PE+1
+         BEQ LS_DONE
+LS_CHR:
          LDA (LP),Y
          CMP #CR
          BEQ LS_EOL
