@@ -162,8 +162,6 @@ module apple1_top(clk, reset, hsync, vsync, rgb, keycode, keystrobe);
   // values for punctuation keys >= 0x80 (not ASCII). Remap to correct ASCII.
   // Letters/digits/CR/BS/Space have keyCode == ASCII, passed through as-is.
   // Result retains bit7 (= key-pressed signal for Apple 1 protocol).
-  // For shifted punctuation, the browser fires a keypress with the shifted
-  // charCode (e.g. shift+' sends 0xA2 for '"'), which falls through correctly.
   function [7:0] remap_key;
     input [7:0] kc;
     begin
@@ -174,10 +172,8 @@ module apple1_top(clk, reset, hsync, vsync, rgb, keycode, keystrobe);
         8'hBD: remap_key = 8'hAD; // keyCode 189 - -> ASCII '-'(0x2D)|0x80
         8'hBE: remap_key = 8'hAE; // keyCode 190 . -> ASCII '.'(0x2E)|0x80
         8'hBF: remap_key = 8'hAF; // keyCode 191 / -> ASCII '/'(0x2F)|0x80
-        8'hC0: remap_key = 8'hA2; // keyCode 192 = backtick ` (unshifted) -> '"'|0x80
-                                   // ` is top-left key on US keyboard, no shift needed.
-                                   // Backtick not used in BASIC, so safe to repurpose.
-        8'hDE: remap_key = 8'hA7; // keyCode 222 ' -> ASCII "'"(0x27)|0x80
+              8'hC0: remap_key = 8'hA2; // keyCode 192 = backtick ` (unshifted @) -> '"'|0x80
+        8'hDE: remap_key = 8'hAB; // keyCode 222 ' -> ASCII "+"(0x2B)|0x80
         default: remap_key = kc;  // ASCII|0x80 correct: digits, letters,
       endcase                     //  CR(0x8D), BS(0x88), shift-chars(0xA2=")
     end
