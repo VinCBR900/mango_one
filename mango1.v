@@ -10,6 +10,8 @@
 ; Modifications by Vincent Crabtree, Mar 2026
 ; - Replaced ROM with uBASIC6502
 ; - uBASIC GETCHAR / PUTCHAR modified for verilog
+; see
+;   https://github.com/VinCBR900/65c02-Tiny-BASIC
 ; ==========================================
 
 /**
