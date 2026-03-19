@@ -4,9 +4,18 @@
 
 /**
 ; ==========================================
-; uBASIC6502 fork of mango_one  v1.1
+; uBASIC6502 fork of mango_one  v1.2
 ; Original monitor and emulator by sehugg
 ; Modifications by Vincent Crabtree, Mar 2026
+;
+; For Original see
+;  https://github.com/sehugg/mango_one
+;
+; For Tiny BASIC  see
+;   https://github.com/VinCBR900/65c02-Tiny-BASIC
+; 
+; The Demo has a Showcase program embedded. 
+; Type LIST to see it and RUN to, er, RUN it
 ;
 ; v1.2 (Mar 2026) Fix Keyboard for correct BASIC syntax "=+;*
 ;   Finagle keyboard handler to convert to ASCII
@@ -23,14 +32,9 @@
 ;   Replaced Monitor ROM with uBASIC6502
 ;   uBASIC GETCHAR / PUTCHAR modified for verilog interface
 ;
-; For Original see
-;  https://github.com/sehugg/mango_one
-;
-; For Tiny BASIC  see
-;   https://github.com/VinCBR900/65c02-Tiny-BASIC
 ; ==========================================
 
-/**
+**
 Mango One
 
 A 6502 computer inspired by Steve Wozniak's Apple I design
@@ -170,7 +174,9 @@ module apple1_top(clk, reset, hsync, vsync, rgb, keycode, keystrobe);
         8'hBD: remap_key = 8'hAD; // keyCode 189 - -> ASCII '-'(0x2D)|0x80
         8'hBE: remap_key = 8'hAE; // keyCode 190 . -> ASCII '.'(0x2E)|0x80
         8'hBF: remap_key = 8'hAF; // keyCode 191 / -> ASCII '/'(0x2F)|0x80
-        8'hC0: remap_key = 8'hE0; // keyCode 192 ` -> ASCII '`'(0x60)|0x80
+        8'hC0: remap_key = 8'hA2; // keyCode 192 = backtick ` (unshifted) -> '"'|0x80
+                                   // ` is top-left key on US keyboard, no shift needed.
+                                   // Backtick not used in BASIC, so safe to repurpose.
         8'hDE: remap_key = 8'hA7; // keyCode 222 ' -> ASCII "'"(0x27)|0x80
         default: remap_key = kc;  // ASCII|0x80 correct: digits, letters,
       endcase                     //  CR(0x8D), BS(0x88), shift-chars(0xA2=")
