@@ -176,7 +176,7 @@ module apple1_top(clk, reset, hsync, vsync, rgb, keycode, keystrobe);
     for (i=0; i<2048; i=i+1) basic_rom[i] = 0;
     for (i=0; i<1059; i=i+1) showcase_rom[i] = 0;
     $readmemh("showcase.hex", showcase_rom);
-    for (i=0; i<1059; i=i+1) ram[12'h200 + i] = showcase_rom[i];
+          for (i=0; i<1059; i=i+1) ram[32'h200 + i] = showcase_rom[i];
     $readmemh("ubasic6502.hex", basic_rom);
   end
   
