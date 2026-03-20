@@ -20,7 +20,7 @@
 ;
 ; v1.6 (Mar 2026) ESC key triggers BREAK via hardware IRQ.
 ;   ESC keyCode=27=0x1B, arrives as keycode=0x9B (0x1B|0x80).
-;   IRQ (active LOW) is asserted while keycode==0x9B; keystrobe
+;   IRQ (active HIGH here) is asserted while keycode==0x9B; keystrobe
 ;   clears bit7 -> keycode drops below 0x80 -> IRQ deasserts cleanly.
 ;   ESC is masked from D010/D011 (returns 0x00) so it never lands in
 ;   IBUF as a character. BASIC IRQ_HANDLER checks RUN flag: if a program
@@ -184,7 +184,7 @@ module apple1_top(clk, reset, hsync, vsync, rgb, keycode, keystrobe);
   // Held low while keycode stays 0x9B; keystrobe clears bit7 -> deasserts.
   // BASIC IRQ_HANDLER ($FFFE) checks RUN flag: if running, unwinds stack
   // and prints "BREAK IN <linenum>", then returns to MAIN prompt.
-  wire IRQ = !(keycode == 8'h9B); // active LOW: 0=asserted, 1=idle
+  wire IRQ = (keycode == 8'h9B); // active LOW: 0=asserted, 1=idle
   wire NMI=0;           // non-maskable interrupt request
   wire RDY=1;           // Ready signal. Pauses CPU when RDY=0 
  
