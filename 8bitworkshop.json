@@ -1,0 +1,8 @@
+{
+  "name": "Mango One",
+  "platform": "verilog",
+  "files": [
+    "mango1.v"
+  ],
+  "main": "mango1.v"
+}
