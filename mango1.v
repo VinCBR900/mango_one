@@ -23,21 +23,16 @@
 ;   % and ; are unavailable (shift state lost in browser).
 ;
 ; v1.7 (Mar 2026) Code review fixes:
-;   - remap_key() disabled (commented out) for initial Kowalski I/O testing
 ;   - .ti no longer strips bit7 (DO is plain ASCII from CPU)
-;   - remap_key default no longer strips bit7 (pass-through unchanged)
-;   - $E007 IRQ-ack write removed; IRQ deasserts naturally via keystrobe
-;     on next $E004 read (wire IRQ = keycode==0x9B handles assertion)
 ;   - RAM loaded from ram.hex (full 4KB, $0000-$0FFF) instead of
 ;     showcase_rom intermediate + copy loop; showcase.hex retired
 ; v1.6 (Mar 2026) Switch from Apple 1 PIA ($D010-$D012) to Kowalski I/O
-;   ($E001/$E004/$E007). This matches the original uBASIC6502.asm exactly
+;   ($E001/$E004). This matches the original uBASIC6502.asm exactly
 ;   so the ROM needs no changes. Benefits:
 ;   - PUTCH: STA $E001 + RTS  (was: spin on BIT $D012 / BMI loop)
 ;   - GETCH: LDA $E004 / BEQ loop (was: poll $D011 + read $D010 + AND #$7F)
 ;   - tready/keystrobe handshake removed from display path entirely
 ;   - te fires directly on $E001 write with no timing dependency
-;   - IRQ acknowledge: STA $E007 in IRQ handler strobes keycode clear
 ; v1.5 (Mar 2026) Rewrote remap_key() with accurate keyCode analysis.
 ;   8bitworkshop delivers keyCode|0x80, not ASCII. Shift state is lost for
 ;   digit-row keys. Surrogates assigned for (, ), *, + using unshifted keys
@@ -125,7 +120,6 @@ endmodule
 // I/O map (Kowalski layout, matching original uBASIC6502.asm):
 //   $E001  w   IO_OUT : write char to signetics_term  (PUTCH: STA $E001)
 //   $E004  r   IO_IN  : read char; 0 = no key waiting  (GETCH: LDA $E004 / BEQ)
-//   $E007  w   IO_IRQ : assert IRQ (BREAK); also clears keycode via keystrobe
 //   $F800-$FFFF    ROM (ubasic6502.hex, 2048 bytes)
 //   $0000-$0FFF    RAM (4 KB; showcase pre-loaded at $0200)
 // =============================================================================
@@ -160,11 +154,6 @@ module apple1_top(clk, reset, hsync, vsync, rgb, keycode, keystrobe);
   // 8bitworkshop delivers keyCode|0x80. keyCode is the physical key position,
   // not the character — shift state is lost for digit-row keys.
   //
-  // Remapping is currently DISABLED for initial testing. Raw keycode passes
-  // through unchanged so we can verify basic I/O first. Re-enable the case
-  // entries below once that is confirmed working.
-  //
-  // When re-enabled, these corrections are needed:
   //   0xBB = key -> '='   0xBC , -> ','   0xBD - -> '-'
   //   0xBE . -> '.'       0xBF / -> '/'
   //   0xC0 ` -> '"'   0xDB [ -> '('   0xDD ] -> ')'
@@ -174,17 +163,16 @@ module apple1_top(clk, reset, hsync, vsync, rgb, keycode, keystrobe);
     input [7:0] kc;
     begin
       case (kc)
-        // Remapping disabled — uncomment to re-enable:
-        // 8'hBB: remap_key = 8'h3D; // = key  -> '='
-        // 8'hBC: remap_key = 8'h2C; // , key  -> ','
-        // 8'hBD: remap_key = 8'h2D; // - key  -> '-'
-        // 8'hBE: remap_key = 8'h2E; // . key  -> '.'
-        // 8'hBF: remap_key = 8'h2F; // / key  -> '/'
-        // 8'hC0: remap_key = 8'h22; // ` key  -> '"'
-        // 8'hDB: remap_key = 8'h28; // [ key  -> '('
-        // 8'hDD: remap_key = 8'h29; // ] key  -> ')'
-        // 8'hDC: remap_key = 8'h2A; // \ key  -> '*'
-        // 8'hDE: remap_key = 8'h2B; // ' key  -> '+'
+        8'hBB: remap_key = 8'h3D; // = key  -> '='
+        8'hBC: remap_key = 8'h2C; // , key  -> ','
+        8'hBD: remap_key = 8'h2D; // - key  -> '-'
+        8'hBE: remap_key = 8'h2E; // . key  -> '.'
+        8'hBF: remap_key = 8'h2F; // / key  -> '/'
+        8'hC0: remap_key = 8'h22; // ` key  -> '"'
+        8'hDB: remap_key = 8'h28; // [ key  -> '('
+        8'hDD: remap_key = 8'h29; // ] key  -> ')'
+        8'hDC: remap_key = 8'h2A; // \ key  -> '*'
+        8'hDE: remap_key = 8'h2B; // ' key  -> '+'
         default: remap_key = kc & 8'h7F;  // strip bit7: 8bitworkshop delivers keyCode|0x80
       endcase
     end
