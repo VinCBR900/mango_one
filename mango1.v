@@ -19,6 +19,7 @@
 ; See below about Keyboard remapping if you actually want to type BASIC
 ;
 ; v1.6 (Mar 2026) ESC key triggers BREAK via hardware IRQ.
+;   Note: Spotty performance in EDGE, better in Chrome browser.
 ;   ESC keyCode=27=0x1B, arrives as keycode=0x9B (0x1B|0x80).
 ;   IRQ (active HIGH here) is asserted while keycode==0x9B; keystrobe
 ;   clears bit7 -> keycode drops below 0x80 -> IRQ deasserts cleanly.
@@ -180,11 +181,11 @@ module apple1_top(clk, reset, hsync, vsync, rgb, keycode, keystrobe);
   wire [7:0] DI;        // data in, read bus
   wire [7:0] DO;        // data out, write bus
   wire WE;              // write enable
-  // IRQ: active LOW. Assert when ESC is pressed (keycode = ESC|0x80 = 0x9B).
-  // Held low while keycode stays 0x9B; keystrobe clears bit7 -> deasserts.
+  // IRQ: active HIGH here. Assert when ESC is pressed (keycode = ESC|0x80 = 0x9B).
+  // Async  HIGH while keycode stays 0x9B; keystrobe clears bit7 -> deasserts.
   // BASIC IRQ_HANDLER ($FFFE) checks RUN flag: if running, unwinds stack
   // and prints "BREAK IN <linenum>", then returns to MAIN prompt.
-  wire IRQ = (keycode == 8'h9B); // active LOW: 0=asserted, 1=idle
+ wire IRQ = (keycode == 8'h9B); //Async active High 
   wire NMI=0;           // non-maskable interrupt request
   wire RDY=1;           // Ready signal. Pauses CPU when RDY=0 
  
