@@ -135,7 +135,7 @@ module apple1_top(clk, reset, hsync, vsync, rgb, keycode, keystrobe);
   wire [8:0] hpos, vpos;
 
   wire [15:0] AB;
-  wire [7:0]  DI;
+  reg [7:0]  DI;
   wire [7:0]  DO;
   wire        WE;
 
