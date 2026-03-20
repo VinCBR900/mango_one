@@ -23,26 +23,26 @@
 ;   % and ; are unavailable (shift state lost in browser).
 ;
 ; v1.7 (Mar 2026) Code review fixes: More keyboard remapping
-;   - Embedded ROM and showcase code as issues with $readmemh
+;   - Embedded ROM & Showcase code as Verilog Header since issues  with
+;   $readmemh in 8bitworkshop
 ;   - .ti no longer strips bit7 (DO is plain ASCII from CPU)
-; v1.6 (Mar 2026) Switch from Apple 1 PIA ($D010-$D012) to Kowalski I/O
-;   ($E001/$E004/$E007). This matches the original uBASIC6502.asm exactly
-;   so the ROM needs no changes. Benefits:
+; v1.6 (Mar 2026) Switch from Apple 1 I/O PIA ($D010-$D012) to Kowalski I/O
+;   ($E001/$E004). This matches the original uBASIC6502.asm exactly
+;   so the ROM needs no changes, and Upstream Repo tests work. Benefits:
 ;   - PUTCH: STA $E001 + RTS  (was: spin on BIT $D012 / BMI loop)
 ;   - GETCH: LDA $E004 / BEQ loop (was: poll $D011 + read $D010 + AND #$7F)
 ;   - tready/keystrobe handshake removed from display path entirely
 ;   - te fires directly on $E001 write with no timing dependency
-; v1.5 (Mar 2026) Rewrote remap_key() with accurate keyCode analysis.
-;   8bitworkshop delivers keyCode|0x80, not ASCII. Shift state is lost for
-;   digit-row keys. Initial Surrogates assigned for unshifted keys
-;   not used in BASIC ([ ] \ ').
+; V1.2, 1.3, 1.5 (Mar 2026) Various attempts at fixing Keyboard Mapping
+;   Eventually realized 8bitworkshop delivers keyCode|0x80, not ASCII. 
+;   Shift state is lost for digit-row keys. Workaround is assigned 
+;   Surrogates from unshifted keys not used in BASIC 
 ;   See GitHub issue: https://github.com/sehugg/8bitworkshop/issues/241
 ; v1.4 (Mar 2026) BS ($08) handling in signetics_term: backspace-overwrite-
 ;   backspace in one clock.
-; v1.3 (Mar 2026) Map backtick ` -> " surrogate.
-; v1.2 (Mar 2026) Keyboard remapping: browser keyCode -> correct ASCII.
 ; v1.1 (Mar 2026) Fix tready timing: hpos==256 -> hpos>=256.
-; v1.0 (Mar 2026) Initial port of uBASIC6502 to Mango1.
+; v1.0 (Mar 2026) Initial port of uBASIC6502 to Mango 1
+;   Modified uBASIC for Apple 1 I/O interface 
 ; ==========================================
 */
 
@@ -140,7 +140,7 @@ module apple1_top(clk, reset, hsync, vsync, rgb, keycode, keystrobe);
 
   // IRQ: active HIGH in Arlet's cpu6502. ESC (keycode=0x9B) asserts it.
   // Level-triggered: deasserts when keystrobe clears keycode[7] on next $E004 read.
-  // (Spotty in Edge, fine in Chrome — can revisit later.)
+  // (Spotty in MS Edge, fine in Chrome — can revisit later.)
   wire IRQ = (keycode == 8'h9B);
   wire NMI = 0;
   wire RDY = 1;
@@ -224,11 +224,11 @@ module apple1_top(clk, reset, hsync, vsync, rgb, keycode, keystrobe);
   end
 
   // ---------------------------------------------------------------------------
-  // Memory and ROM
+  // RAM and ROM
   //
-  // ram.hex: full 4KB image of $0000-$0FFF extracted from the assembled binary.
-  // Includes the pre-loaded BASIC showcase program at $0200 and zero-filled
-  // zero-page / stack. No SHOWCASE_END trimming needed — load the whole thing.
+  // ROM is 2KB image of $F800-$FFFF, RAM is 4KB image of $0000-$0FFF, both 
+  // extracted from the assembled binary. RAM Includes the pre-loaded BASIC 
+  // showcase program at $0200 and zero-filled zero-page / stack.
   // ---------------------------------------------------------------------------
   reg [7:0] ram[4096];
   reg [7:0] basic_rom[2048];
