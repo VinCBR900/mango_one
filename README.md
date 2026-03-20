@@ -31,5 +31,5 @@ $0000 | $0FFF    | RAM
 $D010 | $D013    | 6821 PIA (keyboard, terminal)
 $F800 | $FFFF    | Tiny BASIC, CPU vectors
 
-You can open this project in [8 Bit Workshop](https://8bitworkshop.com/v3.12.1/?repo=VinCBR900%2Fmango_one&platform=verilog&file=mango1.v) and try it Out!
+You can open this project in [8 Bit Workshop](https://8bitworkshop.com/v3.12.1/?repo=VinCBR900%2Fmango_one&platform=verilog&file=mango1.v) and try it Out!  Type `LIST` to view the embedded BASIC program and `RUN` to execute it.
 
