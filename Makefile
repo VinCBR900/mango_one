@@ -6,20 +6,28 @@
 # from the upstream tip.
 #
 # Targets:
-#   all    - build ubasic6502.hex and ram.hex  (default)
+#   all    - build Verilog header files (default)
 #   tools  - build asm65c02 assembler only
 #   fetch  - force re-download of upstream sources
 #   clean  - remove all generated files including fetched sources
 #
 # Generated files (not committed):
-#   asm65c02.c       fetched from upstream
-#   uBASIC6502.asm   fetched from upstream
-#   asm65c02         assembled assembler binary
-#   ubasic_full.bin  full 64KB assembled image
-#   ubasic6502.hex   ROM hex  ($F800-$FFFF, one byte per line)
-#   ram.hex          RAM hex  ($0000-$0FFF, one byte per line)
-#                    Loaded directly into mango1.v ram[] — includes the
-#                    pre-loaded BASIC showcase at $0200, zero-page, stack.
+#   asm65c02.c        fetched from upstream
+#   uBASIC6502.asm    fetched from upstream
+#   asm65c02          assembler binary
+#   ubasic_full.bin   full 64KB assembled image
+#   ubasic6502.hex    ROM hex  ($F800-$FFFF, one byte per line)
+#   ram.hex           RAM hex  ($0000-$0FFF, one byte per line)
+#
+# Generated files (committed - embedded in mango1.v):
+#   rom_init.vh       Verilog initial statement for basic_rom[]
+#   ram_init.vh       Verilog initial statement for ram[]
+#
+# Usage in mango1.v:
+#   reg [7:0] basic_rom[2048];
+#   reg [7:0] ram[4096];
+#   `include "rom_init.vh"
+#   `include "ram_init.vh"
 # =============================================================================
 
 CC      := gcc
@@ -31,18 +39,20 @@ ASM_SRC   := asm65c02.c
 BASIC_SRC := uBASIC6502.asm
 ASM       := asm65c02
 
-FULL_BIN    := ubasic_full.bin
-ROM_HEX     := ubasic6502.hex
-RAM_HEX     := ram.hex
+FULL_BIN  := ubasic_full.bin
+ROM_HEX   := ubasic6502.hex
+RAM_HEX   := ram.hex
+ROM_VH    := rom_init.vh
+RAM_VH    := ram_init.vh
 
-RAM_START   := 0x0000
-RAM_END     := 0x0FFF
-ROM_START   := 0xF800
-ROM_END     := 0xFFFF
+RAM_START := 0x0000
+RAM_END   := 0x0FFF
+ROM_START := 0xF800
+ROM_END   := 0xFFFF
 
 .PHONY: all tools fetch clean
 
-all: $(ROM_HEX) $(RAM_HEX)
+all: $(ROM_VH) $(RAM_VH)
 
 tools: $(ASM)
 
@@ -73,11 +83,10 @@ from pathlib import Path; \
 full = Path('$(FULL_BIN)').read_bytes(); \
 chunk = full[$(ROM_START):$(ROM_END)+1]; \
 Path('$(ROM_HEX)').write_text(''.join(f'{x:02x}\n' for x in chunk)); \
-print(f'$(ROM_HEX): \$$$(shell printf '%04X' $(ROM_START))-\$$$(shell printf '%04X' $(ROM_END)) = {len(chunk)} bytes') \
+print(f'$(ROM_HEX): \$$F800-\$$FFFF = {len(chunk)} bytes') \
 "
 
 # RAM hex: $0000-$0FFF (4096 bytes, one byte per line)
-# Includes showcase program at $0200 and zeroed zero-page/stack.
 $(RAM_HEX): $(FULL_BIN)
 	python3 -c "\
 from pathlib import Path; \
@@ -87,5 +96,24 @@ Path('$(RAM_HEX)').write_text(''.join(f'{x:02x}\n' for x in chunk)); \
 print(f'$(RAM_HEX): \$$0000-\$$0FFF = {len(chunk)} bytes') \
 "
 
+# ROM Verilog header: initial statement for basic_rom[2048]
+$(ROM_VH): $(ROM_HEX)
+	python3 -c "\
+from pathlib import Path; \
+vals = ','.join(f\"8'h{b}\" for b in Path('$(ROM_HEX)').read_text().split()); \
+Path('$(ROM_VH)').write_text(f'  initial basic_rom = \x27{{{vals}}};\n'); \
+print('$(ROM_VH): basic_rom[2048] initialised') \
+"
+
+# RAM Verilog header: initial statement for ram[4096]
+$(RAM_VH): $(RAM_HEX)
+	python3 -c "\
+from pathlib import Path; \
+vals = ','.join(f\"8'h{b}\" for b in Path('$(RAM_HEX)').read_text().split()); \
+Path('$(RAM_VH)').write_text(f'  initial ram = \x27{{{vals}}};\n'); \
+print('$(RAM_VH): ram[4096] initialised') \
+"
+
 clean:
-	rm -f $(ASM) $(ASM_SRC) $(BASIC_SRC) $(FULL_BIN) $(ROM_HEX) $(RAM_HEX)
+	rm -f $(ASM) $(ASM_SRC) $(BASIC_SRC) $(FULL_BIN) \
+	      $(ROM_HEX) $(RAM_HEX) $(ROM_VH) $(RAM_VH)
