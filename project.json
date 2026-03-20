@@ -2,7 +2,9 @@
   "name": "Mango One",
   "platform": "verilog",
   "files": [
-    "mango1.v"
+    "mango1.v",
+    "ubasic6502.hex",
+    "ram.hex"
   ],
   "main": "mango1.v"
 }
