@@ -5,9 +5,9 @@ This is a fork of [sehugg/mango_one](https://github.com/sehugg/mango_one), which
 
 Modifications:
 
-- Replaced 256-byte ROM Monitor  with 2 kB uBASIC6502 at $F800
-- Modified GETCHAR / PUTCHAR routines to map BASIC I/O to the emulated Hardware
-- Modified keyboard handler for key BASIC syntax "*/-=+*%
+- Replaced 256-byte ROM Monitor with 2 kB uBASIC6502 at $F800
+- Modified Verilog to map [Kowalski 6502 Simulator](http://retro.hansotten.nl/6502-sbc/kowalski-assembler-simulator/) addresses for BASIC I/O in the emulated Hardware
+- Modified keyboard handler to remap keys for key BASIC syntax "*/-=+*%
 
 All other code remains unchanged. Original project copyright (sehugg) retained.
 
@@ -27,9 +27,9 @@ The Mango One's memory map is very similar to the Apple I:
 
 Start | End      | Description
 ------|----------|----------
-$0000 | $0FFF    | RAM
-$D010 | $D013    | 6821 PIA (keyboard, terminal)
-$F800 | $FFFF    | Tiny BASIC, CPU vectors
+$0000 | $0FFF    | 4kbyte RAM (512bytes for system)
+$E00x | -    | Kowalski Memory Interface: Putchar @ $E001, terminal Getchar at $E004)
+$F800 | $FFFF    | Tiny BASIC and CPU vectors
 
-You can open this project in [8 Bit Workshop](https://8bitworkshop.com/v3.12.1/?repo=VinCBR900%2Fmango_one&platform=verilog&file=mango1.v) and try it Out!  Type `LIST` to view the embedded BASIC program and `RUN` to execute it.
+You can open this project in [8 Bit Workshop](http://8bitworkshop.com/v3.12.1/?redir.html?platform=verilog&githubURL=https%3A%2F%2Fgithub.com%2FVinCBR900%2Fmango_one&file=mango1.v) and try it Out!  Type `LIST` to view the embedded BASIC program and `RUN` to execute it - Pressing `ESC` aborts running program.
 
