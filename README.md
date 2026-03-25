@@ -7,11 +7,11 @@ Modifications:
 
 - Replaced 256-byte ROM Monitor with 2 kB uBASIC6502 at $F800
 - Modified Verilog to map [Kowalski 6502 Simulator](http://retro.hansotten.nl/6502-sbc/kowalski-assembler-simulator/) addresses for BASIC I/O in the emulated Hardware
-- Modified keyboard handler to remap keys for key BASIC syntax "*/-=+*%
+- Modified keyboard handler to remap keys for BASIC syntax "*/-=+*%
 
 All other code remains unchanged. Original project copyright (sehugg) retained.
 
-For details on uBASIC Tiny BASIC see
+**Note:** Github Actions runs `Makefile` daily, which pulls upstream uBASIC6502.asm and automatically rebuilds if changes.  For details and source for uBASIC Tiny BASIC see
 
 https://github.com/VinCBR900/65c02-Tiny-BASIC 
 
