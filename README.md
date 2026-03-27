@@ -31,5 +31,7 @@ $0000 | $0FFF    | 4kbyte RAM (512bytes for system)
 $E00x | -    | Kowalski Memory Interface: Putchar @ $E001, terminal Getchar at $E004)
 $F800 | $FFFF    | Tiny BASIC and CPU vectors
 
-You can open this project in [8 Bit Workshop](http://8bitworkshop.com/v3.12.1/?redir.html?platform=verilog&githubURL=https%3A%2F%2Fgithub.com%2FVinCBR900%2Fmango_one&file=mango1.v) and try it Out!  Type `LIST` to view the embedded BASIC program and `RUN` to execute it - Pressing `ESC` aborts running program.
+You can open this project in [8 Bit Workshop](http://8bitworkshop.com/v3.12.1/?redir.html?platform=verilog&githubURL=https%3A%2F%2Fgithub.com%2FVinCBR900%2Fmango_one&file=mango1.v) and try it Out!  
+
+Type `LIST` to view the embedded BASIC program and `RUN` to execute it - Pressing `ESC` aborts running program.
 
