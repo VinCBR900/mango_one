@@ -58,7 +58,7 @@ tools: $(ASM)
 
 # Fetch upstream sources (only if not already present)
 $(ASM_SRC):
-	curl -fsSL "$(UPSTREAM)/asm65c02.c" -o $@
+	curl -fsSL "$(UPSTREAM)/tools/asm65c02.c" -o $@
 
 $(BASIC_SRC):
 	curl -fsSL "$(UPSTREAM)/uBASIC6502.asm" -o $@
